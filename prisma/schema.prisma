@@ -1,22 +1,154 @@
-generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-}
-
 datasource db {
   provider = "postgresql"
-  }
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum SkinType {
+  OILY
+  DRY
+  NORMAL
+  COMBINATION
+  SENSITIVE
+}
+
+enum ProductType {
+  ORGANIC
+  FORMULATED
+}
+
 model User {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  email     String   @unique
-  age       Int
-  createdAt DateTime @default(now())
+  email     String    @unique
+  password  String
+  role      Role      @default(CUSTOMER)
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  wishlists Wishlist[]
+  orders    Order[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  products  Product[]
+
+  @@map("categories")
 }
 
 model Product {
+  id              String        @id @default(uuid())
+  name            String
+  description     String
+  price           Float
+  stock           Int
+  image           String
+  categoryId      String
+  skinType        SkinType
+  targetAudience  String
+  productType     ProductType
+  isDeleted       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  category        Category      @relation(fields: [categoryId], references: [id])
+  wishlists       Wishlist[]
+  orderItems      OrderItem[]
+  packageItems    PackageItem[]
+
+  @@map("products")
+}
+
+model Package {
+  id           String        @id @default(uuid())
+  name         String
+  description  String
+  image        String
+  price        Float
+  isDeleted    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  packageItems PackageItem[]
+
+  @@map("packages")
+}
+
+model PackageItem {
   id        String   @id @default(uuid())
-  title     String
-  price     Float
+  packageId String
+  productId String
+
+  package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("package_items")
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
   createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("wishlists")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  totalAmount Float
+  status      OrderStatus @default(PENDING)
+  address     String
+  city        String
+  phone       String
+  isDeleted   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id])
+  orderItems  OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
 }
