@@ -1,12 +1,13 @@
 import prisma from "../lib/prisma";
 
-const createOrderIntoDB = async (payload: any) => {
+const createOrderIntoDB = async (userId: string, payload: any) => {
   try {
     const { orderItems, ...orderData } = payload;
 
-    const result = await (prisma as any).order.create({
+    const result = await prisma.order.create({
       data: {
         ...orderData,
+        userId: userId, // টোকেন বা পেলোড থেকে আসা userId এখানে যুক্ত হবে
         orderItems: {
           create: orderItems.map((item: any) => ({
             productId: item.productId,
@@ -17,6 +18,7 @@ const createOrderIntoDB = async (payload: any) => {
       },
       include: {
         orderItems: true,
+        user: true, // চাইলে ইউজারের তথ্যও সাথে দেখতে পাবে
       },
     });
 
@@ -29,9 +31,10 @@ const createOrderIntoDB = async (payload: any) => {
 
 const getAllOrdersFromDB = async () => {
   try {
-    const result = await (prisma as any).order.findMany({
+    const result = await prisma.order.findMany({
       include: {
         orderItems: true,
+        user: true,
       },
     });
     return result;
@@ -40,7 +43,6 @@ const getAllOrdersFromDB = async () => {
     throw error;
   }
 };
-
 
 export const OrderService = {
   createOrderIntoDB,
