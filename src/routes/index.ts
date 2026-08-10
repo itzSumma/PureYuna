@@ -1,16 +1,14 @@
-import { Router, Request, Response } from "express";
-import prisma from "@/lib/prisma";
+import { Router } from "express";
+import category from "./category";
+// অন্যান্য রাউটগুলো এভাবে ইম্পোর্ট করতে পারੋ:
+// import users from "./users";
+// import products from "./products";
 
 const router = Router();
 
-// Get all users
-router.get("/", async (req: Request, res: Response) => {
-  try {
-    const users = await prisma.user.findMany();
-    res.json({ success: true, data: users });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
+// সব রাউট এখানে রেজিস্টার হবে
+router.use("/categories", category);
+// router.use("/users", users);
+// router.use("/products", products);
 
 export default router;
