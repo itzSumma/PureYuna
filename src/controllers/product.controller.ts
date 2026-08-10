@@ -1,0 +1,84 @@
+import { Request, Response } from "express";
+import { ProductService } from "../services/Product";
+import sendResponse from "../utils/sendResponse";
+
+const createProduct = async (req: Request, res: Response) => {
+  try {
+    const result = await ProductService.createProductIntoDB(req.body);
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+      message: "Product created successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getAllProducts = async (req: Request, res: Response) => {
+  try {
+    const result = await ProductService.getAllProductsFromDB();
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Products fetched successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getProductById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await ProductService.getProductByIdFromDB(id as string);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Product fetched successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const updateProduct = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await ProductService.updateProductInDB(id as string, req.body);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Product updated successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await ProductService.deleteProductFromDB(id as string);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Product deleted successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const ProductController = {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+};
