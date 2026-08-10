@@ -7,12 +7,59 @@ const createProductIntoDB = async (payload: any) => {
   return result;
 };
 
-const getAllProductsFromDB = async () => {
+const getAllProductsFromDB = async (query: any) => {
+  const { search, category, skinType, targetAudience, productType, sort, page, limit } = query;
+
+  const filters: any = { isDeleted: false };
+
+  // ১. Search লজিক
+  if (search) {
+    filters.name = {
+      contains: search,
+      mode: "insensitive",
+    };
+  }
+
+  // ২. Filtering লজিক
+  if (category) filters.categoryId = category;
+  if (skinType) filters.skinType = skinType;
+  if (targetAudience) filters.targetAudience = targetAudience;
+  if (productType) filters.productType = productType;
+
+  // ৩. Sorting লজিক
+  let orderBy: any = { createdAt: "desc" };
+  if (sort === "price-low") {
+    orderBy = { price: "asc" };
+  } else if (sort === "price-high") {
+    orderBy = { price: "desc" };
+  } else if (sort === "newest") {
+    orderBy = { createdAt: "desc" };
+  }
+
+  // ৪. Pagination লজিক
+  const pageNumber = Number(page) || 1;
+  const pageSize = Number(limit) || 12;
+  const skip = (pageNumber - 1) * pageSize;
+
   const result = await (prisma.product as any).findMany({
-    where: { isDeleted: false },
+    where: filters,
     include: { category: true },
+    orderBy,
+    skip,
+    take: pageSize,
   });
-  return result;
+
+  const total = await (prisma.product as any).count({ where: filters });
+
+  return {
+    meta: {
+      page: pageNumber,
+      limit: pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
+    data: result,
+  };
 };
 
 const getProductByIdFromDB = async (id: string) => {

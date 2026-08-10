@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ProductService } from "../services/Product";
+import { ProductService } from "../services/product"; // পাথ ঠিক করা হয়েছে
 import sendResponse from "../utils/sendResponse";
 
 const createProduct = async (req: Request, res: Response) => {
@@ -18,12 +18,14 @@ const createProduct = async (req: Request, res: Response) => {
 
 const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const result = await ProductService.getAllProductsFromDB();
+    // এখানে req.query পাস করা হয়েছে এবং টাইপ এরর এড়াতে টাইপ কাস্টিং দেওয়া হয়েছে
+    const result = await ProductService.getAllProductsFromDB(req.query as any);
     sendResponse(res, {
       statusCode: 200,
       success: true,
       message: "Products fetched successfully",
-      data: result,
+      meta: result.meta, // এখন এখানে কোনো লাল দাগ বা এরর আসবে না
+      data: result.data,
     });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
