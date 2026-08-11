@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { ProductController } from "../controllers/product.controller";
-import auth from "../middleware/auth"; // আপনার অথেন্টিকেশন ও রোল মিডলওয়্যার ইম্পোর্ট করুন
+import auth from "../middleware/auth";
+import validateRequest from "../middleware/validateRequest";
+import { ProductValidation } from "../validations/product.validation";
 
 const router = Router();
 
@@ -8,9 +10,21 @@ const router = Router();
 router.get("/", ProductController.getAllProducts);
 router.get("/:id", ProductController.getProductById);
 
-// অ্যাডমিন প্রোটেক্টেড রাউট (শুধু ADMIN রোল হোল্ডাররাই এগুলো করতে পারবে)
-router.post("/", auth("ADMIN"), ProductController.createProduct);
-router.patch("/:id", auth("ADMIN"), ProductController.updateProduct);
+// অ্যাডমিন প্রোটেক্টেড রাউট (সঠিক স্কিমা নামসহ ভ্যালিডেশন মিডলওয়্যার)
+router.post(
+  "/", 
+  auth("ADMIN"), 
+  validateRequest(ProductValidation.createProductValidationSchema), 
+  ProductController.createProduct
+);
+
+router.patch(
+  "/:id", 
+  auth("ADMIN"), 
+  validateRequest(ProductValidation.updateProductValidationSchema), 
+  ProductController.updateProduct
+);
+
 router.delete("/:id", auth("ADMIN"), ProductController.deleteProduct);
 
 export default router;

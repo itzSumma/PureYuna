@@ -1,6 +1,8 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import mainRouter from "./routes/index";
+import notFound from "./middleware/notFound"; // ব্র্যাকেট ছাড়া ইম্পোর্ট (যদি default export হয়ে থাকে)
+import globalErrorHandler from "./middleware/globalErrorHandler"; // ব্র্যাকেট ছাড়া ইম্পোর্ট
 
 const app: Application = express();
 
@@ -16,7 +18,13 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-
+// Main API Router
 app.use("/api/v1", mainRouter);
+
+// Not Found Handler
+app.use(notFound);
+
+// Global Error Handler
+app.use(globalErrorHandler);
 
 export default app;
