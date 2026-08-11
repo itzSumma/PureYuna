@@ -30,7 +30,39 @@ const getAllPackages = async (req: Request, res: Response) => {
   }
 };
 
+const updatePackage = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const result = await PackageService.updatePackageIntoDB(id, req.body);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Package updated successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const deletePackage = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const result = await PackageService.deletePackageFromDB(id);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Package deleted successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const PackageController = {
   createPackage,
   getAllPackages,
+  updatePackage,
+  deletePackage,
 };

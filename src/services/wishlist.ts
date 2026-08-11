@@ -1,6 +1,20 @@
 import prisma from "../lib/prisma";
 
 const addToWishlistIntoDB = async (userId: string, productId: string) => {
+  // ১. চেক করা প্রোডাক্টটি ইতিমধ্যে উইশলিস্টে আছে কি না
+  const isExist = await prisma.wishlist.findFirst({
+    where: {
+      userId,
+      productId,
+    },
+  });
+
+  if (isExist) {
+    const error: any = new Error("Product is already in your wishlist!");
+    error.statusCode = 409; // Conflict Status Code
+    throw error;
+  }
+
   const result = await prisma.wishlist.create({
     data: {
       userId,
@@ -30,7 +44,6 @@ const getWishlistFromDB = async (userId: string) => {
 };
 
 const removeFromWishlistFromDB = async (userId: string, wishlistId: string) => {
-  
   const isExist = await prisma.wishlist.findFirst({
     where: {
       id: wishlistId,
@@ -39,7 +52,9 @@ const removeFromWishlistFromDB = async (userId: string, wishlistId: string) => {
   });
 
   if (!isExist) {
-    throw new Error("Wishlist item not found or unauthorized!");
+    const error: any = new Error("Wishlist item not found or unauthorized!");
+    error.statusCode = 404;
+    throw error;
   }
 
   const result = await prisma.wishlist.delete({

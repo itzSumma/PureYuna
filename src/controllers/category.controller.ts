@@ -34,24 +34,42 @@ const getAllCategories = async (req: Request, res: Response) => {
 const getCategoryById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    // চাইলে সার্ভিস ফাইলে মেথড বানিয়ে এখানে কল করতে পারো
     res.status(200).json({ success: true, message: "Single category" });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// ১. ক্যাটেগরি আপডেট কন্ট্রোলার (সার্ভিসের সাথে কানেক্ট করা হলো)
 const updateCategory = async (req: Request, res: Response) => {
   try {
-    res.status(200).json({ success: true, message: "Category updated" });
+   const id = req.params.id as string;
+    const payload = req.body;
+    const result = await CategoryService.updateCategoryIntoDB(id, payload);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Category updated successfully",
+      data: result,
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// ২. ক্যাটেগরি ডিলিট কন্ট্রোলার (সার্ভিসের সাথে কানেক্ট করা হলো)
 const deleteCategory = async (req: Request, res: Response) => {
   try {
-    res.status(200).json({ success: true, message: "Category deleted" });
+    const id = req.params.id as string;
+    const result = await CategoryService.deleteCategoryIntoDB(id);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Category deleted successfully",
+      data: result,
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

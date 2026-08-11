@@ -9,10 +9,18 @@ export const orderValidationSchema = z.object({
     z.object({
       productId: z.string().min(1, 'Product ID is required'),
       quantity: z.number().int().positive('Quantity must be at least 1'),
-   
     })
   ).min(1, 'Order must contain at least one item')
 });
+
+// সঠিক স্ট্যাটাস ভ্যালিডেশন স্কিমা (পেন্ডিং, প্রসেসিং, শিপড, ডেলিভারড, ক্যানসেলড সহ)
+export const updateOrderStatusValidationSchema = z.object({
+  status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]),
+});
+
+export const OrderValidation = {
+  updateOrderStatusValidationSchema,
+};
 
 export const validateOrder = (schema: z.ZodSchema) => (req: Request, res: Response, next: NextFunction) => {
   try {

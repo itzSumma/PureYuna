@@ -2,16 +2,34 @@ import prisma from "../lib/prisma";
 
 const createOrderIntoDB = async (userId: string, payload: any) => {
   try {
-    // Zod স্কিমার সাথে মিল রেখে items কে orderItems নামে রিসিভ করা হলো
     const { items: orderItems, ...orderData } = payload;
 
-    // ট্রানজাকশন ব্যবহার করে স্টক কমানো এবং অর্ডার তৈরি একসাথে করা
     const result = await prisma.$transaction(async (tx) => {
       let totalAmount = 0;
       const formattedOrderItems = [];
 
       for (const item of orderItems) {
-        // ১. প্রোডাক্টের বর্তমান স্টক ও আসল দাম চেক করা
+        // ১. অ্যাটমিক ও কন্ডিশনাল স্টক আপডেট (Race condition এবং overselling রোধ করতে)
+        const updatedProduct = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            isDeleted: false,
+            stock: {
+              gte: item.quantity, // পর্যাপ্ত স্টক থাকলেই কেবল ডিক্রিমেন্ট হবে
+            },
+          },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+
+        if (updatedProduct.count === 0) {
+          throw new Error(`Product with ID ${item.productId} is out of stock, deleted, or unavailable.`);
+        }
+
+        // ২. প্রোডাক্টের সঠিক বর্তমান প্রাইস নিয়ে আসার জন্য
         const product = await tx.product.findUnique({
           where: { id: item.productId },
         });
@@ -20,23 +38,12 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
           throw new Error(`Product with ID ${item.productId} not found`);
         }
 
-        if (product.stock < item.quantity) {
-          throw new Error(`Insufficient stock for product: ${product.name}`);
-        }
-
-        // ২. স্টক কমানো
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: product.stock - item.quantity },
-        });
-
-        // নিরাপত্তা নিশ্চিত করতে ফ্রন্টএন্ডের প্রাইস বাদ দিয়ে ডেটাবেজের আসল product.price ব্যবহার করা হলো
         totalAmount += product.price * item.quantity;
         
         formattedOrderItems.push({
           productId: item.productId,
           quantity: item.quantity,
-          price: product.price, // ডেটাবেজের আসল প্রাইস সেভ হবে
+          price: product.price,
         });
       }
 
@@ -44,7 +51,7 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
       const order = await tx.order.create({
         data: {
           ...orderData,
-          totalAmount: totalAmount, // ব্যাকএন্ডে ক্যালকুলেট করা সঠিক টোটাল অ্যামাউন্ট
+          totalAmount: totalAmount,
           userId: userId,
           orderItems: {
             create: formattedOrderItems,
@@ -66,7 +73,6 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
   }
 };
 
-// নতুন যোগ করা: নির্দিষ্ট ইউজারের নিজের অর্ডারগুলো নিয়ে আসার ফাংশন
 const getMyOrdersFromDB = async (userId: string) => {
   try {
     const result = await prisma.order.findMany({
@@ -125,7 +131,7 @@ const updateOrderStatusInDB = async (orderId: string, status: any) => {
 
 export const OrderService = {
   createOrderIntoDB,
-  getMyOrdersFromDB, // এটি এখানে যুক্ত করা হলো
+  getMyOrdersFromDB,
   getAllOrdersFromDB,
   updateOrderStatusInDB,
 };

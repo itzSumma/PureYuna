@@ -42,8 +42,14 @@ const loginUser = async (payload: any) => {
     throw new Error("Incorrect password!");
   }
 
+  // সিকিউরিটি ফিক্স: হার্ডকোডেড ফলব্যাক বাদ দেওয়া হলো এবং এনভায়রনমেন্ট ভ্যারিয়েবল চেক করা হচ্ছে
+  const secretKey = process.env.JWT_SECRET;
+
+  if (!secretKey) {
+    throw new Error("JWT_SECRET is not defined in the environment variables!");
+  }
+
   // JWT টোকেন জেনারেট করা
-  const secretKey = process.env.JWT_SECRET || "super-secret-key";
   const token = jwt.sign(
     { email: user.email, role: user.role, userId: user.id },
     secretKey,
@@ -61,7 +67,7 @@ const loginUser = async (payload: any) => {
   };
 };
 
-// ৩. নতুন যোগ করা: ডেটাবেজ থেকে নিজের প্রোফাইল নিয়ে আসার লজিক
+// ৩. ডেটাবেজ থেকে নিজের প্রোফাইল নিয়ে আসার লজিক
 const getMyProfileFromDB = async (userId: string) => {
   const result = await prisma.user.findUnique({
     where: { id: userId },
@@ -82,9 +88,8 @@ const getMyProfileFromDB = async (userId: string) => {
   return result;
 };
 
-// ৪. নতুন যোগ করা: নিজের প্রোফাইল আপডেট করার লজিক
+// ৪. নিজের প্রোফাইল আপডেট করার লজিক
 const updateMyProfileIntoDB = async (userId: string, payload: any) => {
-  // সিকিউরিটির জন্য কেউ যেন সরাসরি রোল বা ইমেইল হুট করে পরিবর্তন করতে না পারে (প্রয়োজনীয় ফিল্ড ফিল্টার করা যেতে পারে)
   const result = await prisma.user.update({
     where: { id: userId },
     data: payload,
@@ -103,6 +108,6 @@ const updateMyProfileIntoDB = async (userId: string, payload: any) => {
 export const UserService = {
   registerUserIntoDB,
   loginUser,
-  getMyProfileFromDB,    // এখানে যুক্ত করা হলো
-  updateMyProfileIntoDB, // এখানে যুক্ত করা হলো
+  getMyProfileFromDB,
+  updateMyProfileIntoDB,
 };
