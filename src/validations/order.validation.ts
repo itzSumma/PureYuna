@@ -4,12 +4,12 @@ import { Request, Response, NextFunction } from 'express';
 export const orderValidationSchema = z.object({
   address: z.string().min(5, 'Address is required'),
   city: z.string().min(2, 'City is required'),
-  phone: z.string().min(10, 'Phone number is required'), // এটি নতুন যোগ করা হলো
+  phone: z.string().min(10, 'Phone number is required'),
   items: z.array(
     z.object({
       productId: z.string().min(1, 'Product ID is required'),
       quantity: z.number().int().positive('Quantity must be at least 1'),
-      price: z.number().positive('Price must be a positive number')
+   
     })
   ).min(1, 'Order must contain at least one item')
 });

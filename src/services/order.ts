@@ -11,7 +11,7 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
       const formattedOrderItems = [];
 
       for (const item of orderItems) {
-        // ১. প্রোডাক্টের বর্তমান স্টক চেক করা
+        // ১. প্রোডাক্টের বর্তমান স্টক ও আসল দাম চেক করা
         const product = await tx.product.findUnique({
           where: { id: item.productId },
         });
@@ -30,11 +30,13 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
           data: { stock: product.stock - item.quantity },
         });
 
-        totalAmount += item.price * item.quantity;
+        // নিরাপত্তা নিশ্চিত করতে ফ্রন্টএন্ডের প্রাইস বাদ দিয়ে ডেটাবেজের আসল product.price ব্যবহার করা হলো
+        totalAmount += product.price * item.quantity;
+        
         formattedOrderItems.push({
           productId: item.productId,
           quantity: item.quantity,
-          price: item.price,
+          price: product.price, // ডেটাবেজের আসল প্রাইস সেভ হবে
         });
       }
 
@@ -42,7 +44,7 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
       const order = await tx.order.create({
         data: {
           ...orderData,
-          totalAmount: orderData.totalAmount || totalAmount,
+          totalAmount: totalAmount, // ব্যাকএন্ডে ক্যালকুলেট করা সঠিক টোটাল অ্যামাউন্ট
           userId: userId,
           orderItems: {
             create: formattedOrderItems,
@@ -60,6 +62,31 @@ const createOrderIntoDB = async (userId: string, payload: any) => {
     return result;
   } catch (error: any) {
     console.log("Order Creation Error:", error);
+    throw error;
+  }
+};
+
+// নতুন যোগ করা: নির্দিষ্ট ইউজারের নিজের অর্ডারগুলো নিয়ে আসার ফাংশন
+const getMyOrdersFromDB = async (userId: string) => {
+  try {
+    const result = await prisma.order.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return result;
+  } catch (error: any) {
+    console.log("Get My Orders Error:", error);
     throw error;
   }
 };
@@ -98,6 +125,7 @@ const updateOrderStatusInDB = async (orderId: string, status: any) => {
 
 export const OrderService = {
   createOrderIntoDB,
+  getMyOrdersFromDB, // এটি এখানে যুক্ত করা হলো
   getAllOrdersFromDB,
   updateOrderStatusInDB,
 };

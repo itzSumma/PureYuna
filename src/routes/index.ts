@@ -12,7 +12,8 @@ router.use("/categories", categoryRouter);
 router.use("/products", productRouter);
 router.use("/packages", packageRouter);
 router.use("/orders", orderRouter);
-router.use("/auth", userRoutes);
+router.use("/auth", userRoutes);     
+router.use("/users", userRoutes);   
 router.use("/wishlists", WishlistRoutes); 
 
 export default router;
