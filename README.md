@@ -65,62 +65,62 @@ Auth middleware behavior:
 
 ### Root
 
-| Method | Endpoint | Access | Notes |
-| --- | --- | --- | --- |
-| GET | `/` | Public | Returns a welcome message from the app root |
+| Method | Endpoint | Access | Notes                                       |
+| ------ | -------- | ------ | ------------------------------------------- |
+| GET    | `/`      | Public | Returns a welcome message from the app root |
 
 ### Auth
 
-| Method | Endpoint | Access | Notes |
-| --- | --- | --- | --- |
-| POST | `/api/v1/auth/register` | Public | Registers a user. The backend forces `role` to `CUSTOMER` internally. |
-| POST | `/api/v1/auth/login` | Public | Logs in a user and returns a JWT token. |
-| GET | `/api/v1/auth/profile` | CUSTOMER, ADMIN | Returns the authenticated user's profile. |
-| PATCH | `/api/v1/auth/profile` | CUSTOMER, ADMIN | Updates the authenticated user's profile. |
+| Method | Endpoint                | Access          | Notes                                                                 |
+| ------ | ----------------------- | --------------- | --------------------------------------------------------------------- |
+| POST   | `/api/v1/auth/register` | Public          | Registers a user. The backend forces `role` to `CUSTOMER` internally. |
+| POST   | `/api/v1/auth/login`    | Public          | Logs in a user and returns a JWT token.                               |
+| GET    | `/api/v1/auth/profile`  | CUSTOMER, ADMIN | Returns the authenticated user's profile.                             |
+| PATCH  | `/api/v1/auth/profile`  | CUSTOMER, ADMIN | Updates the authenticated user's profile.                             |
 
 ### Categories
 
-| Method | Endpoint | Access | Notes |
-| --- | --- | --- | --- |
-| GET | `/api/v1/categories` | Public | Returns all categories. |
-| POST | `/api/v1/categories` | ADMIN | Creates a category. |
-| PATCH | `/api/v1/categories/:id` | ADMIN | Updates a category by id. |
-| DELETE | `/api/v1/categories/:id` | ADMIN | Deletes a category by id. |
+| Method | Endpoint                 | Access | Notes                     |
+| ------ | ------------------------ | ------ | ------------------------- |
+| GET    | `/api/v1/categories`     | Public | Returns all categories.   |
+| POST   | `/api/v1/categories`     | ADMIN  | Creates a category.       |
+| PATCH  | `/api/v1/categories/:id` | ADMIN  | Updates a category by id. |
+| DELETE | `/api/v1/categories/:id` | ADMIN  | Deletes a category by id. |
 
 ### Products
 
-| Method | Endpoint | Access | Notes |
-| --- | --- | --- | --- |
-| GET | `/api/v1/products` | Public | Returns products with optional filtering, sorting, and pagination. |
-| GET | `/api/v1/products/:id` | Public | Returns one product by id. |
-| POST | `/api/v1/products` | ADMIN | Creates a product. |
-| PATCH | `/api/v1/products/:id` | ADMIN | Updates a product by id. |
-| DELETE | `/api/v1/products/:id` | ADMIN | Soft deletes a product by setting `isDeleted` to true. |
+| Method | Endpoint               | Access | Notes                                                              |
+| ------ | ---------------------- | ------ | ------------------------------------------------------------------ |
+| GET    | `/api/v1/products`     | Public | Returns products with optional filtering, sorting, and pagination. |
+| GET    | `/api/v1/products/:id` | Public | Returns one product by id.                                         |
+| POST   | `/api/v1/products`     | ADMIN  | Creates a product.                                                 |
+| PATCH  | `/api/v1/products/:id` | ADMIN  | Updates a product by id.                                           |
+| DELETE | `/api/v1/products/:id` | ADMIN  | Soft deletes a product by setting `isDeleted` to true.             |
 
 ### Packages
 
-| Method | Endpoint | Access | Notes |
-| --- | --- | --- | --- |
-| GET | `/api/v1/packages` | Public | Returns all non-deleted packages. |
-| POST | `/api/v1/packages` | ADMIN | Creates a package and links product ids. |
-| PATCH | `/api/v1/packages/:id` | ADMIN | Updates a package by id. |
-| DELETE | `/api/v1/packages/:id` | ADMIN | Permanently deletes the package row from the database. |
+| Method | Endpoint               | Access | Notes                                                  |
+| ------ | ---------------------- | ------ | ------------------------------------------------------ |
+| GET    | `/api/v1/packages`     | Public | Returns all non-deleted packages.                      |
+| POST   | `/api/v1/packages`     | ADMIN  | Creates a package and links product ids.               |
+| PATCH  | `/api/v1/packages/:id` | ADMIN  | Updates a package by id.                               |
+| DELETE | `/api/v1/packages/:id` | ADMIN  | Permanently deletes the package row from the database. |
 
 ### Orders
 
-| Method | Endpoint | Access | Notes |
-| --- | --- | --- | --- |
-| GET | `/api/v1/orders/my-orders` | CUSTOMER, ADMIN | Returns the authenticated user's orders. |
-| POST | `/api/v1/orders` | CUSTOMER, ADMIN | Creates an order for the authenticated user. |
-| GET | `/api/v1/orders` | ADMIN | Returns all orders. |
-| PATCH | `/api/v1/orders/:id/status` | ADMIN | Updates an order status by id. |
+| Method | Endpoint                    | Access          | Notes                                        |
+| ------ | --------------------------- | --------------- | -------------------------------------------- |
+| GET    | `/api/v1/orders/my-orders`  | CUSTOMER, ADMIN | Returns the authenticated user's orders.     |
+| POST   | `/api/v1/orders`            | CUSTOMER, ADMIN | Creates an order for the authenticated user. |
+| GET    | `/api/v1/orders`            | ADMIN           | Returns all orders.                          |
+| PATCH  | `/api/v1/orders/:id/status` | ADMIN           | Updates an order status by id.               |
 
 ### Wishlists
 
-| Method | Endpoint | Access | Notes |
-| --- | --- | --- | --- |
-| POST | `/api/v1/wishlists` | Any authenticated user | Adds a product to the authenticated user's wishlist. |
-| GET | `/api/v1/wishlists` | Any authenticated user | Returns the authenticated user's wishlist. |
+| Method | Endpoint                | Access                 | Notes                                                        |
+| ------ | ----------------------- | ---------------------- | ------------------------------------------------------------ |
+| POST   | `/api/v1/wishlists`     | Any authenticated user | Adds a product to the authenticated user's wishlist.         |
+| GET    | `/api/v1/wishlists`     | Any authenticated user | Returns the authenticated user's wishlist.                   |
 | DELETE | `/api/v1/wishlists/:id` | Any authenticated user | Removes a wishlist item by wishlist item id, not product id. |
 
 ## Request validation and payload rules
@@ -259,10 +259,7 @@ Body:
     "https://example.com/images/hydration-bundle-1.jpg",
     "https://example.com/images/hydration-bundle-2.jpg"
   ],
-  "productIds": [
-    "product_id_1",
-    "product_id_2"
-  ]
+  "productIds": ["product_id_1", "product_id_2"]
 }
 ```
 
@@ -285,10 +282,7 @@ Example body:
 {
   "name": "Hydration Bundle Plus",
   "price": 89.99,
-  "productIds": [
-    "product_id_1",
-    "product_id_3"
-  ]
+  "productIds": ["product_id_1", "product_id_3"]
 }
 ```
 
