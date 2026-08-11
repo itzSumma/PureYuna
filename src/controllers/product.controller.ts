@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ProductService } from "../services/product"; // পাথ ঠিক করা হয়েছে
+import { ProductService } from "../services/product";
 import sendResponse from "../utils/sendResponse";
 
 const createProduct = async (req: Request, res: Response) => {
