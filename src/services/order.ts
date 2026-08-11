@@ -2,7 +2,8 @@ import prisma from "../lib/prisma";
 
 const createOrderIntoDB = async (userId: string, payload: any) => {
   try {
-    const { orderItems, ...orderData } = payload;
+    // Zod স্কিমার সাথে মিল রেখে items কে orderItems নামে রিসিভ করা হলো
+    const { items: orderItems, ...orderData } = payload;
 
     // ট্রানজাকশন ব্যবহার করে স্টক কমানো এবং অর্ডার তৈরি একসাথে করা
     const result = await prisma.$transaction(async (tx) => {
@@ -78,7 +79,6 @@ const getAllOrdersFromDB = async () => {
   }
 };
 
-// স্ট্যাটাস আপডেট করার সার্ভিসটি এখানে যুক্ত করে দিন
 const updateOrderStatusInDB = async (orderId: string, status: any) => {
   try {
     const updatedOrder = await prisma.order.update({

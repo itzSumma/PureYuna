@@ -3,7 +3,7 @@ import { OrderService } from "../services/order";
 
 const createOrder = async (req: Request & { user?: any }, res: Response) => {
   try {
-       const userId = req.user?.userId; 
+    const userId = req.user?.userId; 
 
     if (!userId) {
       return res.status(401).json({
@@ -15,8 +15,8 @@ const createOrder = async (req: Request & { user?: any }, res: Response) => {
     const result = await OrderService.createOrderIntoDB(userId, req.body);
 
     res.status(201).json({
-      success: false,
-           message: "Order created successfully!",
+      success: true, // এটি আগে false ছিল, ঠিক করে true করা হলো
+      message: "Order created successfully!",
       data: result,
     });
   } catch (error: any) {
@@ -26,6 +26,7 @@ const createOrder = async (req: Request & { user?: any }, res: Response) => {
     });
   }
 };
+
 const getAllOrders = async (req: Request, res: Response) => {
   try {
     const result = await OrderService.getAllOrdersFromDB();
@@ -41,11 +42,13 @@ const getAllOrders = async (req: Request, res: Response) => {
     });
   }
 };
+
 const updateOrderStatus = async (req: Request, res: Response) => {
   try {
-   const id = req.params.id as string;
+    const id = req.params.id as string;
     const { status } = req.body;
-const result = await OrderService.updateOrderStatusInDB(id as string, status);
+    const result = await OrderService.updateOrderStatusInDB(id, status);
+    
     res.status(200).json({
       success: true,
       message: "Order status updated successfully!",
@@ -62,5 +65,5 @@ const result = await OrderService.updateOrderStatusInDB(id as string, status);
 export const OrderController = {
   createOrder,
   getAllOrders,
-  updateOrderStatus, 
+  updateOrderStatus,
 };
